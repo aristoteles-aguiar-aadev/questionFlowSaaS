@@ -1,0 +1,17 @@
+  {
+  "name": "questionflowsaas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Aristoteles Aguiar",
+  "license": "ISC",
+  "description": "Plataforma profissional de pesquisas baseada em SurveyJS",
+  "dependencies": {
+    "chart.js": "^4.4.9",
+    "survey-core": "^2.1.0",
+    "survey-creator-core": "^2.1.0"
+  }
+}

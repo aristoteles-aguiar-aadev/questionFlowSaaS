@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="../assets/questioFlowLogoTraslucid.png" type="image/x-icon">
+    <title>QuestionFlow - SaaS de Pesquisas</title>
+
+    <!-- CSS Libraries -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/survey-core/1.11.5/defaultV2.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/survey-creator-core/1.11.5/survey-creator-core.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --primary-color: #0C283D; /* azul meia noite */
+        --primary-dark: #f80083; /* rosa escuro */
+        --secondary-color: #f8a5c2; /* rosa pastel */
+        --success-color: #55efc4; /* verde menta */
+        --danger-color: #ff6b81; /* vermelho rosado */
+        --warning-color: #84FF00; /* verde lima */
+        --info-color: #74b9ff; /* azul bebê */
+        --light-gray: #fff0f6; /* rosa muito claro */
+        --dark-gray: #574b90; /* roxo escuro */
+        --medium-gray: #b5838d; /* lilás rosado */
+        --border-color: #ffdce0; /* rosa suave para bordas */
+        --shadow: 0 10px 25px rgba(255, 182, 193, 0.2);
+        --shadow-lg: 0 20px 40px rgba(255, 105, 180, 0.2);
+      }
+
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 10%,
+          var(--primary-dark) 100%
+        );
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      /* Layout Principal */
+      .app-container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 280px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-lg);
+        padding: 30px 0;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 100;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.hidden {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        flex: 1;
+        margin-left: 280px;
+        padding: 30px;
+        transition: margin-left 0.3s ease;
+      }
+
+      .main-content.expanded {
+        margin-left: 0;
+      }
+
+      /* Header da Sidebar */
+      .sidebar-header {
+        padding: 0 30px 30px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 30px;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+      }
+
+      .user-info {
+        color: var(--medium-gray);
+        font-size: 0.9rem;
+      }
+
+      /* Menu da Sidebar */
+      .sidebar-menu {
+        list-style: none;
+      }
+
+      .menu-item {
+        margin-bottom: 5px;
+      }
+
+      .menu-link {
+        display: flex;
+        align-items: center;
+        padding: 15px 30px;
+        color: var(--dark-gray);
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-right: 3px solid transparent;
+      }
+
+      .menu-link:hover {
+        background: var(--light-gray);
+        border-right-color: var(--primary-color);
+      }
+
+      .menu-link.active {
+        background: linear-gradient(
+          90deg,
+          rgba(102, 126, 234, 0.1),
+          transparent
+        );
+        border-right-color: var(--primary-color);
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      .menu-link i {
+        width: 20px;
+        margin-right: 15px;
+        font-size: 1.1rem;
+      }
+
+      /* Header Principal */
+      .page-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 25px 30px;
+        margin-bottom: 30px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .page-title {
+        color: var(--dark-gray);
+        font-size: 1.8rem;
+        font-weight: 700;
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      /* Botões */
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.95rem;
+        text-align: center;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        color: white;
+      }
+
+      .btn-primary:hover {
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: var(--light-gray);
+        color: var(--dark-gray);
+        border: 2px solid var(--border-color);
+      }
+
+      .btn-secondary:hover {
+        background: var(--border-color);
+      }
+
+      .btn-success {
+        background: var(--success-color);
+        color: white;
+      }
+
+      .btn-danger {
+        background: var(--danger-color);
+        color: white;
+      }
+
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+
+      /* Cards */
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: var(--shadow);
+        margin-bottom: 30px;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .card-title {
+        color: var(--dark-gray);
+        font-size: 1.3rem;
+        font-weight: 600;
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+      }
+
+      .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+      }
+
+      .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--dark-gray);
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        color: var(--medium-gray);
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+
+      .stat-change {
+        margin-top: 10px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+      }
+
+      .stat-change.positive {
+        color: var(--success-color);
+      }
+
+      .stat-change.negative {
+        color: var(--danger-color);
+      }
+
+      /* Survey Grid */
+      .survey-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+      }
+
+      .survey-card {
+        background: white;
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .survey-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .survey-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+      }
+
+      .survey-status {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+      }
+
+      .status-active {
+        background: rgba(72, 187, 120, 0.1);
+        color: var(--success-color);
+      }
+
+      .status-draft {
+        background: rgba(237, 137, 54, 0.1);
+        color: var(--warning-color);
+      }
+
+      .status-paused {
+        background: rgba(66, 153, 225, 0.1);
+        color: var(--info-color);
+      }
+
+      .survey-title {
+        color: var(--dark-gray);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        margin-right: 80px;
+      }
+
+      .survey-description {
+        color: var(--medium-gray);
+        margin-bottom: 15px;
+        line-height: 1.5;
+      }
+
+      .survey-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background: var(--light-gray);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        color: var(--medium-gray);
+      }
+
+      .survey-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: var(--dark-gray);
+      }
+
+      .form-input {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      /* Charts */
+      .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: var(--shadow);
+      }
+
+      .chart-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+        margin-bottom: 20px;
+      }
+
+      .chart-canvas {
+        max-height: 400px;
+      }
+
+      /* Modals */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+      }
+
+      .modal.active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 90%;
+        max-height: 90%;
+        overflow-y: auto;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+      }
+
+      .close-modal {
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--medium-gray);
+        transition: color 0.3s ease;
+      }
+
+      .close-modal:hover {
+        color: var(--danger-color);
+      }
+      
+      /* Auth Forms */
+      .auth-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+     
+      .logo-question-flow {
+        width: 300px;
+        height: 300px;
+        margin: -40px;
+      }
+      
+      .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 450px;
+        max-height: auto;
+        width: 80%;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .auth-header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark-gray);
+        margin-bottom: 10px;
+      }
+
+      .auth-subtitle {
+        color: var(--medium-gray);
+      }
+
+      .auth-switch {
+        text-align: center;
+        margin-top: 25px;
+        color: var(--medium-gray);
+      }
+
+      .auth-switch a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      /* Alerts */
+      .alert {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-weight: 500;
+      }
+
+      .alert-success {
+        background: rgba(72, 187, 120, 0.1);
+        color: var(--success-color);
+        border: 1px solid rgba(72, 187, 120, 0.2);
+      }
+
+      .alert-error {
+        background: rgba(229, 62, 62, 0.1);
+        color: var(--danger-color);
+        border: 1px solid rgba(229, 62, 62, 0.2);
+      }
+
+      .alert-warning {
+        background: rgba(237, 137, 54, 0.1);
+        color: var(--warning-color);
+        border: 1px solid rgba(237, 137, 54, 0.2);
+      }
+
+      /* Loading */
+      .loading {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.mobile-open {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .page-header {
+          flex-direction: column;
+          gap: 15px;
+          text-align: center;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .survey-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+          padding: 20px;
+          margin: 20px;
+        }
+      }
+
+      /* Hidden utility */
+      .hidden {
+        display: none !important;
+      }
+
+      /* Page specific styles */
+      .survey-builder-container {
+        min-height: 600px;
+        border-radius: 15px;
+        overflow: hidden;
+      }
+
+      .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 25px;
+      }
+      
+      
+    </style>
+  </head>
+  <body>
+    <!-- Auth Container (Mostrado apenas quando não logado) -->
+    <div id="authContainer" class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+            <img class="logo-question-flow" src="../assets/questioFlowLogo.png" alt="logo">
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Login Form -->
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              id="loginEmail"
+              class="form-input"
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input
+              type="password"
+              id="loginPassword"
+              class="form-input"
+              placeholder="Sua senha"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%">
+            <span id="loginBtnText">Entrar</span>
+            <div id="loginSpinner" class="spinner hidden"></div>
+          </button>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="hidden">
+          <div class="form-group">
+            <label class="form-label">Nome Completo</label>
+            <input
+              type="text"
+              id="registerName"
+              class="form-input"
+              placeholder="Seu nome completo"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              id="registerEmail"
+              class="form-input"
+              placeholder="seu@email.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input
+              type="password"
+              id="registerPassword"
+              class="form-input"
+              placeholder="Mínimo 8 caracteres"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%">
+            <span id="registerBtnText">Criar Conta</span>
+            <div id="registerSpinner" class="spinner hidden"></div>
+          </button>
+        </form>
+
+        <div class="auth-switch">
+          <span id="authSwitchText">Não tem uma conta?</span>
+          <a href="#" id="authSwitchLink">Criar conta</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App Container (Mostrado apenas quando logado) -->
+    <div id="appContainer" class="app-container hidden">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">🎯 QuestionFlow</div>
+          <div class="user-info" id="userInfo">Carregando...</div>
+        </div>
+
+        <nav>
+          <ul class="sidebar-menu">
+            <li class="menu-item">
+              <a href="#" class="menu-link active" data-page="dashboard">
+                <i class="fas fa-chart-line"></i>
+                Dashboard
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" class="menu-link" data-page="surveys">
+                <i class="fas fa-poll"></i>
+                Minhas Pesquisas
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" class="menu-link" data-page="create">
+                <i class="fas fa-plus"></i>
+                Criar Pesquisa
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" class="menu-link" data-page="analytics">
+                <i class="fas fa-chart-bar"></i>
+                Analytics
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="#" class="menu-link" data-page="responses">
+                <i class="fas fa-comments"></i>
+                Respostas
+              </a>
+            </li>
+            <li
+              class="menu-item"
+              style="
+                margin-top: 30px;
+                border-top: 1px solid var(--border-color);
+                padding-top: 20px;
+              "
+            >
+              <a href="#" class="menu-link" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Sair
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content" id="mainContent">
+        <!-- Mobile Menu Toggle -->
+        <button
+          class="btn btn-secondary mobile-menu-toggle"
+          onclick="toggleSidebar()"
+          style="display: none; margin-bottom: 20px"
+        >
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page">
+          <div class="page-header">
+            <h1 class="page-title">📊 Dashboard</h1>
+            <div class="header-actions">
+              <button class="btn btn-secondary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i>
+                Atualizar
+              </button>
+              <button class="btn btn-primary" onclick="showPage('create')">
+                <i class="fas fa-plus"></i>
+                Nova Pesquisa
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-grid" id="dashboardStats">
+            <!-- Stats serão carregados dinamicamente -->
+          </div>
+
+          <div class="analytics-grid">
+            <div class="chart-container">
+              <h3 class="chart-title">
+                📈 Respostas por Dia (Últimos 30 dias)
+              </h3>
+              <canvas id="responsesChart" class="chart-canvas"></canvas>
+            </div>
+
+            <div class="chart-container">
+              <h3 class="chart-title">🏆 Top Pesquisas por Respostas</h3>
+              <canvas id="topSurveysChart" class="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🕐 Pesquisas Recentes</h3>
+            </div>
+            <div id="recentSurveys" class="survey-grid">
+              <!-- Pesquisas recentes serão carregadas aqui -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Surveys Page -->
+        <div id="surveysPage" class="page hidden">
+          <div class="page-header">
+            <h1 class="page-title">📋 Minhas Pesquisas</h1>
+            <div class="header-actions">
+              <select
+                id="statusFilter"
+                class="form-input"
+                style="width: auto; margin-right: 10px"
+              >
+                <option value="">Todos os status</option>
+                <option value="active">Ativas</option>
+                <option value="draft">Rascunhos</option>
+                <option value="paused">Pausadas</option>
+                <option value="completed">Finalizadas</option>
+              </select>
+              <input
+                type="text"
+                id="searchSurveys"
+                class="form-input"
+                placeholder="Buscar pesquisas..."
+                style="width: 250px; margin-right: 10px"
+              />
+              <button class="btn btn-primary" onclick="showPage('create')">
+                <i class="fas fa-plus"></i>
+                Nova Pesquisa
+              </button>
+            </div>
+          </div>
+
+          <div id="surveysGrid" class="survey-grid">
+            <!-- Pesquisas serão carregadas aqui -->
+          </div>
+
+          <div id="surveysPagination" class="pagination-container">
+            <!-- Paginação será gerada aqui -->
+          </div>
+        </div>
+
+        <!-- Create Survey Page -->
+        <div id="createPage" class="page hidden">
+          <div class="page-header">
+            <h1 class="page-title">➕ Criar Nova Pesquisa</h1>
+            <div class="header-actions">
+              <button class="btn btn-secondary" onclick="showPage('surveys')">
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <form id="createSurveyForm">
+              <div class="form-group">
+                <label class="form-label">Título da Pesquisa</label>
+                <input
+                  type="text"
+                  id="surveyTitle"
+                  class="form-input"
+                  placeholder="Ex: Pesquisa de Satisfação do Cliente"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Descrição</label>
+                <textarea
+                  id="surveyDescription"
+                  class="form-input form-textarea"
+                  placeholder="Descreva o objetivo da sua pesquisa..."
+                ></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-rocket"></i>
+                Criar Pesquisa
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analyticsPage" class="page hidden">
+          <div class="page-header">
+            <h1 class="page-title">📈 Analytics</h1>
+            <div class="header-actions">
+              <select
+                id="analyticsTimeframe"
+                class="form-input"
+                style="width: auto"
+              >
+                <option value="7">Últimos 7 dias</option>
+                <option value="30" selected>Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="analyticsContent">
+            <!-- Analytics content será carregado aqui -->
+          </div>
+        </div>
+
+        <!-- Responses Page -->
+        <div id="responsesPage" class="page hidden">
+          <div class="page-header">
+            <h1 class="page-title">💬 Respostas</h1>
+            <div class="header-actions">
+              <select
+                id="responseSurveyFilter"
+                class="form-input"
+                style="width: auto"
+              >
+                <option value="">Selecione uma pesquisa</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="responsesContent">
+            <div
+              style="
+                text-align: center;
+                padding: 60px 20px;
+                color: var(--medium-gray);
+              "
+            >
+              <i
+                class="fas fa-comments"
+                style="
+                  font-size: 4rem;
+                  margin-bottom: 20px;
+                  color: var(--border-color);
+                "
+              ></i>
+              <h3>Selecione uma pesquisa para ver as respostas</h3>
+              <p>
+                Escolha uma pesquisa no filtro acima para visualizar e analisar
+                as respostas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Survey Builder Modal -->
+    <div id="surveyBuilderModal" class="modal">
+      <div class="modal-content" style="max-width: 95%; max-height: 95%">
+        <div class="modal-header">
+          <h3 class="modal-title">✏️ Editor de Pesquisa</h3>
+          <span class="close-modal" onclick="closeSurveyBuilder()"
+            >&times;</span
+          >
+        </div>
+        <div class="survey-builder-container" id="surveyBuilder"></div>
+        <div
+          style="
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+          "
+        >
+          <button class="btn btn-success" onclick="saveSurvey()">
+            <i class="fas fa-save"></i>
+            Salvar Pesquisa
+          </button>
+          <button class="btn btn-secondary" onclick="previewSurvey()">
+            <i class="fas fa-eye"></i>
+            Visualizar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Survey Preview Modal -->
+    <div id="surveyPreviewModal" class="modal">
+      <div class="modal-content" style="max-width: 80%; max-height: 90%">
+        <div class="modal-header">
+          <h3 class="modal-title">👁️ Pré-visualização da Pesquisa</h3>
+          <span class="close-modal" onclick="closeSurveyPreview()"
+            >&times;</span
+          >
+        </div>
+        <div id="surveyPreview"></div>
+      </div>
+    </div>
+
+    <!-- Survey Analytics Modal -->
+    <div id="surveyAnalyticsModal" class="modal">
+      <div class="modal-content" style="max-width: 95%; max-height: 95%">
+        <div class="modal-header">
+          <h3 class="modal-title">📊 Analytics da Pesquisa</h3>
+          <span class="close-modal" onclick="closeSurveyAnalytics()"
+            >&times;</span
+          >
+        </div>
+        <div id="surveyAnalyticsContent">
+          <!-- Analytics content será carregado aqui -->
+        </div>
+        <div style="margin-top: 30px; text-align: center">
+          <button
+            class="btn btn-primary"
+            onclick="exportToPDF(currentAnalyticsSurveyId)"
+          >
+            <i class="fas fa-file-pdf"></i>
+            Exportar PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-core/1.11.5/survey.core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-js-ui/1.11.5/survey-js-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/survey-creator-core/1.11.5/survey-creator-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+
+    <script>
+      // ===== CONFIGURAÇÃO E ESTADO GLOBAL =====
+      const API_BASE = "/api";
+      let currentUser = null;
+      let accessToken = null;
+      let refreshToken = null;
+      let surveys = [];
+      let currentSurvey = null;
+      let surveyCreator = null;
+      let currentAnalyticsSurveyId = null;
+
+      // ===== FUNÇÕES DE AUTENTICAÇÃO =====
+      function showAlert(message, type = "error") {
+        const alertContainer = document.getElementById("alertContainer");
+        alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="fas fa-${
+                      type === "success"
+                        ? "check-circle"
+                        : type === "warning"
+                        ? "exclamation-triangle"
+                        : "exclamation-circle"
+                    }"></i>
+                    ${message}
+                </div>
+            `;
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          alertContainer.innerHTML = "";
+        }, 5000);
+      }
+
+      function setLoading(formId, isLoading) {
+        const form = document.getElementById(formId);
+        const button = form.querySelector('button[type="submit"]');
+        const btnText = button.querySelector("span");
+        const spinner = button.querySelector(".spinner");
+
+        if (isLoading) {
+          button.disabled = true;
+          btnText.style.display = "none";
+          spinner.classList.remove("hidden");
+        } else {
+          button.disabled = false;
+          btnText.style.display = "inline";
+          spinner.classList.add("hidden");
+        }
+      }
+
+      async function apiCall(endpoint, options = {}) {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            ...options.headers,
+          },
+          ...options,
+        };
+
+        if (accessToken && !endpoint.includes("/auth/")) {
+          config.headers.Authorization = `Bearer ${accessToken}`;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}${endpoint}`, config);
+          const data = await response.json();
+
+          if (!response.ok) {
+            // Se token expirou, tentar renovar
+            if (
+              response.status === 401 &&
+              refreshToken &&
+              !endpoint.includes("/auth/")
+            ) {
+              const renewed = await renewToken();
+              if (renewed) {
+                // Retry com novo token
+                config.headers.Authorization = `Bearer ${accessToken}`;
+                const retryResponse = await fetch(
+                  `${API_BASE}${endpoint}`,
+                  config
+                );
+                return await retryResponse.json();
+              } else {
+                logout();
+                return;
+              }
+            }
+            throw new Error(data.error || "Erro na requisição");
+          }
+
+          return data;
+        } catch (error) {
+          console.error("API Error:", error);
+          throw error;
+        }
+      }
+
+      async function renewToken() {
+        try {
+          const data = await apiCall("/auth/refresh", {
+            method: "POST",
+            body: JSON.stringify({ refreshToken }),
+          });
+
+          accessToken = data.accessToken;
+          localStorage.setItem("accessToken", accessToken);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      function switchAuthMode() {
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+        const switchText = document.getElementById("authSwitchText");
+        const switchLink = document.getElementById("authSwitchLink");
+
+        if (loginForm.classList.contains("hidden")) {
+          // Switch to login
+          loginForm.classList.remove("hidden");
+          registerForm.classList.add("hidden");
+          switchText.textContent = "Não tem uma conta?";
+          switchLink.textContent = "Criar conta";
+        } else {
+          // Switch to register
+          loginForm.classList.add("hidden");
+          registerForm.classList.remove("hidden");
+          switchText.textContent = "Já tem uma conta?";
+          switchLink.textContent = "Fazer login";
+        }
+
+        document.getElementById("alertContainer").innerHTML = "";
+      }
+
+      async function login(email, password) {
+        try {
+          const data = await apiCall("/auth/login", {
+            method: "POST",
+            body: JSON.stringify({ email, password }),
+          });
+
+          accessToken = data.accessToken;
+          refreshToken = data.refreshToken;
+          currentUser = data.user;
+
+          // Salvar tokens
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+          localStorage.setItem("user", JSON.stringify(currentUser));
+
+          showApp();
+          showAlert("Login realizado com sucesso!", "success");
+          loadDashboard();
+        } catch (error) {
+          showAlert(error.message);
+        }
+      }
+
+      async function register(name, email, password) {
+        try {
+          const data = await apiCall("/auth/register", {
+            method: "POST",
+            body: JSON.stringify({ name, email, password }),
+          });
+
+          accessToken = data.accessToken;
+          refreshToken = data.refreshToken;
+          currentUser = data.user;
+
+          // Salvar tokens
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
+          localStorage.setItem("user", JSON.stringify(currentUser));
+
+          showApp();
+          showAlert("Conta criada com sucesso!", "success");
+          loadDashboard();
+        } catch (error) {
+          showAlert(error.message);
+        }
+      }
+
+      function logout() {
+        accessToken = null;
+        refreshToken = null;
+        currentUser = null;
+
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+
+        showAuth();
+      }
+
+      function showAuth() {
+        document.getElementById("authContainer").classList.remove("hidden");
+        document.getElementById("appContainer").classList.add("hidden");
+      }
+
+      function showApp() {
+        document.getElementById("authContainer").classList.add("hidden");
+        document.getElementById("appContainer").classList.remove("hidden");
+
+        // Atualizar info do usuário
+        if (currentUser) {
+          document.getElementById("userInfo").textContent = currentUser.name;
+        }
+      }
+
+      function checkAuth() {
+        const savedToken = localStorage.getItem("accessToken");
+        const savedRefreshToken = localStorage.getItem("refreshToken");
+        const savedUser = localStorage.getItem("user");
+
+        if (savedToken && savedRefreshToken && savedUser) {
+          accessToken = savedToken;
+          refreshToken = savedRefreshToken;
+          currentUser = JSON.parse(savedUser);
+          showApp();
+          loadDashboard();
+        } else {
+          showAuth();
+        }
+      }
+
+      // ===== FUNÇÕES DE NAVEGAÇÃO =====
+      function showPage(pageName) {
+        // Hide all pages
+        document.querySelectorAll(".page").forEach((page) => {
+          page.classList.add("hidden");
+        });
+
+        // Remove active class from all menu links
+        document.querySelectorAll(".menu-link").forEach((link) => {
+          link.classList.remove("active");
+        });
+
+        // Show selected page
+        document.getElementById(pageName + "Page").classList.remove("hidden");
+
+        // Add active class to menu link
+        const menuLink = document.querySelector(`[data-page="${pageName}"]`);
+        if (menuLink) {
+          menuLink.classList.add("active");
+        }
+
+        // Load page content
+        switch (pageName) {
+          case "dashboard":
+            loadDashboard();
+            break;
+          case "surveys":
+            loadSurveys();
+            break;
+          case "analytics":
+            loadAnalytics();
+            break;
+          case "responses":
+            loadResponsesPage();
+            break;
+        }
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("mobile-open");
+      }
+
+      // ===== FUNÇÕES DE DASHBOARD =====
+      async function loadDashboard() {
+        try {
+          const data = await apiCall("/analytics/dashboard");
+
+          // Atualizar estatísticas
+          updateDashboardStats(data.stats);
+
+          // Atualizar gráficos
+          updateDashboardCharts(data.charts);
+
+          // Carregar pesquisas recentes
+          await loadRecentSurveys();
+        } catch (error) {
+          console.error("Erro ao carregar dashboard:", error);
+          showAlert("Erro ao carregar dashboard");
+        }
+      }
+
+      function updateDashboardStats(stats) {
+        const statsContainer = document.getElementById("dashboardStats");
+        statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <i class="stat-icon fas fa-poll"></i>
+                    <div class="stat-number">${stats.totalSurveys}</div>
+                    <div class="stat-label">Pesquisas Criadas</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +12% este mês
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="stat-icon fas fa-users"></i>
+                    <div class="stat-number">${stats.totalResponses}</div>
+                    <div class="stat-label">Respostas Coletadas</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +8% este mês
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="stat-icon fas fa-percentage"></i>
+                    <div class="stat-number">${stats.averageResponseRate}%</div>
+                    <div class="stat-label">Taxa de Resposta</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i>
+                        +3% este mês
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="stat-icon fas fa-play-circle"></i>
+                    <div class="stat-number">${stats.activeSurveys}</div>
+                    <div class="stat-label">Pesquisas Ativas</div>
+                    <div class="stat-change">
+                        <i class="fas fa-minus"></i>
+                        Sem alteração
+                    </div>
+                </div>
+            `;
+      }
+
+      function updateDashboardCharts(chartData) {
+        // Gráfico de respostas por dia
+        updateResponsesChart(chartData.responsesPerDay);
+
+        // Gráfico de top pesquisas
+        updateTopSurveysChart(chartData.topSurveys);
+      }
+
+      function updateResponsesChart(data) {
+        const ctx = document.getElementById("responsesChart").getContext("2d");
+
+        // Preparar dados para os últimos 30 dias
+        const last30Days = [];
+        const responseCounts = [];
+
+        for (let i = 29; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toISOString().split("T")[0];
+
+          last30Days.push(
+            date.toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+            })
+          );
+          responseCounts.push(data[dateStr] || 0);
+        }
+
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: last30Days,
+            datasets: [
+              {
+                label: "Respostas",
+                data: responseCounts,
+                borderColor: "rgb(102, 126, 234)",
+                backgroundColor: "rgba(102, 126, 234, 0.1)",
+                tension: 0.4,
+                fill: true,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      function updateTopSurveysChart(data) {
+        const ctx = document.getElementById("topSurveysChart").getContext("2d");
+
+        const labels = data
+          .slice(0, 5)
+          .map((survey) =>
+            survey.title.length > 25
+              ? survey.title.substring(0, 25) + "..."
+              : survey.title
+          );
+        const counts = data.slice(0, 5).map((survey) => survey.response_count);
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Respostas",
+                data: counts,
+                backgroundColor: [
+                  "rgba(102, 126, 234, 0.8)",
+                  "rgba(118, 75, 162, 0.8)",
+                  "rgba(240, 147, 251, 0.8)",
+                  "rgba(72, 187, 120, 0.8)",
+                  "rgba(237, 137, 54, 0.8)",
+                ],
+                borderColor: [
+                  "rgb(102, 126, 234)",
+                  "rgb(118, 75, 162)",
+                  "rgb(240, 147, 251)",
+                  "rgb(72, 187, 120)",
+                  "rgb(237, 137, 54)",
+                ],
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 1,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      async function loadRecentSurveys() {
+        try {
+          const data = await apiCall("/surveys?limit=3");
+          const recentSurveysContainer =
+            document.getElementById("recentSurveys");
+
+          if (data.surveys && data.surveys.length > 0) {
+            recentSurveysContainer.innerHTML = data.surveys
+              .map((survey) => createSurveyCard(survey))
+              .join("");
+          } else {
+            recentSurveysContainer.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                            <i class="fas fa-poll" style="font-size: 3rem; color: var(--border-color); margin-bottom: 15px;"></i>
+                            <h3>Nenhuma pesquisa criada ainda</h3>
+                            <p style="color: var(--medium-gray); margin-bottom: 20px;">Crie sua primeira pesquisa para começar a coletar feedback!</p>
+                            <button class="btn btn-primary" onclick="showPage('create')">
+                                <i class="fas fa-plus"></i>
+                                Criar Primeira Pesquisa
+                            </button>
+                        </div>
+                    `;
+          }
+        } catch (error) {
+          console.error("Erro ao carregar pesquisas recentes:", error);
+        }
+      }
+
+      function refreshDashboard() {
+        loadDashboard();
+        showAlert("Dashboard atualizado!", "success");
+      }
+
+      // ===== FUNÇÕES DE PESQUISAS =====
+      async function loadSurveys(page = 1) {
+        try {
+          const status = document.getElementById("statusFilter")?.value || "";
+          const search = document.getElementById("searchSurveys")?.value || "";
+
+          let endpoint = `/surveys?page=${page}&limit=12`;
+          if (status) endpoint += `&status=${status}`;
+          if (search) endpoint += `&search=${encodeURIComponent(search)}`;
+
+          const data = await apiCall(endpoint);
+          surveys = data.surveys;
+
+          displaySurveys(data.surveys);
+          displayPagination(data.pagination);
+        } catch (error) {
+          console.error("Erro ao carregar pesquisas:", error);
+          showAlert("Erro ao carregar pesquisas");
+        }
+      }
+
+      function displaySurveys(surveysList) {
+        const surveysGrid = document.getElementById("surveysGrid");
+
+        if (surveysList && surveysList.length > 0) {
+          surveysGrid.innerHTML = surveysList
+            .map((survey) => createSurveyCard(survey))
+            .join("");
+        } else {
+          surveysGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--medium-gray);">
+                        <i class="fas fa-search" style="font-size: 4rem; margin-bottom: 20px; color: var(--border-color);"></i>
+                        <h3>Nenhuma pesquisa encontrada</h3>
+                        <p>Tente ajustar os filtros ou criar uma nova pesquisa.</p>
+                    </div>
+                `;
+        }
+      }
+
+      function createSurveyCard(survey) {
+        const statusClass = `status-${survey.status}`;
+        const statusText =
+          {
+            active: "Ativa",
+            draft: "Rascunho",
+            paused: "Pausada",
+            completed: "Finalizada",
+          }[survey.status] || survey.status;
+
+        return `
+                <div class="survey-card">
+                    <div class="survey-status ${statusClass}">${statusText}</div>
+                    <h3 class="survey-title">${survey.title}</h3>
+                    <p class="survey-description">${
+                      survey.description || "Sem descrição"
+                    }</p>
+                    <div class="survey-meta">
+                        <span><i class="fas fa-calendar"></i> ${formatDate(
+                          survey.created_at
+                        )}</span>
+                        <span><i class="fas fa-chart-bar"></i> ${
+                          survey.response_count || 0
+                        } respostas</span>
+                    </div>
+                    <div class="survey-actions">
+                        <button class="btn btn-primary btn-sm" onclick="editSurvey('${
+                          survey.id
+                        }')">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="previewSurveyById('${
+                          survey.id
+                        }')">
+                            <i class="fas fa-eye"></i> Visualizar
+                        </button>
+                        <button class="btn btn-secondary btn-sm" onclick="viewSurveyAnalytics('${
+                          survey.id
+                        }')">
+                            <i class="fas fa-chart-line"></i> Analytics
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteSurvey('${
+                          survey.id
+                        }')">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            `;
+      }
+
+      function displayPagination(pagination) {
+        const container = document.getElementById("surveysPagination");
+        if (!pagination || pagination.totalPages <= 1) {
+          container.innerHTML = "";
+          return;
+        }
+
+        let paginationHTML =
+          '<div style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">';
+
+        // Previous button
+        if (pagination.page > 1) {
+          paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="loadSurveys(${
+            pagination.page - 1
+          })">
+                    <i class="fas fa-chevron-left"></i> Anterior
+                </button>`;
+        }
+
+        // Page numbers
+        for (let i = 1; i <= pagination.totalPages; i++) {
+          const isActive =
+            i === pagination.page ? "btn-primary" : "btn-secondary";
+          paginationHTML += `<button class="btn ${isActive} btn-sm" onclick="loadSurveys(${i})">${i}</button>`;
+        }
+
+        // Next button
+        if (pagination.page < pagination.totalPages) {
+          paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="loadSurveys(${
+            pagination.page + 1
+          })">
+                    Próxima <i class="fas fa-chevron-right"></i>
+                </button>`;
+        }
+
+        paginationHTML += "</div>";
+        container.innerHTML = paginationHTML;
+      }
+
+      async function createSurvey() {
+        const title = document.getElementById("surveyTitle").value;
+        const description = document.getElementById("surveyDescription").value;
+
+        if (!title.trim()) {
+          showAlert("Por favor, insira um título para a pesquisa");
+          return;
+        }
+
+        try {
+          const surveyJson = {
+            title: title,
+            pages: [
+              {
+                name: "page1",
+                elements: [
+                  {
+                    type: "text",
+                    name: "question1",
+                    title: "Sua primeira pergunta aqui",
+                  },
+                ],
+              },
+            ],
+          };
+
+          const data = await apiCall("/surveys", {
+            method: "POST",
+            body: JSON.stringify({
+              title,
+              description: description || "Sem descrição",
+              survey_json: surveyJson,
+            }),
+          });
+
+          // Limpar formulário
+          document.getElementById("surveyTitle").value = "";
+          document.getElementById("surveyDescription").value = "";
+
+          showAlert("Pesquisa criada com sucesso!", "success");
+
+          // Abrir editor
+          editSurvey(data.survey.id);
+        } catch (error) {
+          showAlert(error.message);
+        }
+      }
+
+      async function editSurvey(surveyId) {
+        try {
+          const survey = await apiCall(`/surveys/${surveyId}`);
+          currentSurvey = survey;
+
+          // Inicializar SurveyJS Creator
+          const creatorOptions = {
+            showLogicTab: true,
+            showTranslationTab: true,
+            showEmbeddedSurveyTab: false,
+            allowModifyPages: true,
+          };
+
+          surveyCreator = new SurveyCreator.SurveyCreator(creatorOptions);
+          surveyCreator.text = JSON.stringify(survey.survey_json);
+
+          // Renderizar no modal
+          surveyCreator.render(document.getElementById("surveyBuilder"));
+
+          // Mostrar modal
+          document.getElementById("surveyBuilderModal").classList.add("active");
+        } catch (error) {
+          showAlert("Erro ao carregar pesquisa para edição");
+        }
+      }
+
+      async function saveSurvey() {
+        if (!currentSurvey || !surveyCreator) return;
+
+        try {
+          const surveyJson = JSON.parse(surveyCreator.text);
+
+          await apiCall(`/surveys/${currentSurvey.id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+              title: surveyJson.title || currentSurvey.title,
+              description: currentSurvey.description,
+              survey_json: surveyJson,
+              status: currentSurvey.status,
+            }),
+          });
+
+          showAlert("Pesquisa salva com sucesso!", "success");
+          closeSurveyBuilder();
+          loadSurveys();
+        } catch (error) {
+          showAlert("Erro ao salvar pesquisa");
+        }
+      }
+
+      function previewSurvey() {
+        if (!surveyCreator) return;
+
+        try {
+          const surveyJson = JSON.parse(surveyCreator.text);
+          const survey = new Survey.Model(surveyJson);
+
+          // Renderizar preview
+          const previewContainer = document.getElementById("surveyPreview");
+          previewContainer.innerHTML = "";
+          survey.render(previewContainer);
+
+          // Mostrar modal de preview
+          document.getElementById("surveyPreviewModal").classList.add("active");
+        } catch (error) {
+          showAlert("Erro ao gerar preview da pesquisa");
+        }
+      }
+
+      async function previewSurveyById(surveyId) {
+        try {
+          const survey = await apiCall(`/surveys/${surveyId}`);
+          const surveyModel = new Survey.Model(survey.survey_json);
+
+          // Renderizar preview
+          const previewContainer = document.getElementById("surveyPreview");
+          previewContainer.innerHTML = "";
+          surveyModel.render(previewContainer);
+
+          // Mostrar modal de preview
+          document.getElementById("surveyPreviewModal").classList.add("active");
+        } catch (error) {
+          showAlert("Erro ao carregar preview da pesquisa");
+        }
+      }
+
+      async function deleteSurvey(surveyId) {
+        if (
+          !confirm(
+            "Tem certeza que deseja excluir esta pesquisa? Esta ação não pode ser desfeita."
+          )
+        ) {
+          return;
+        }
+
+        try {
+          await apiCall(`/surveys/${surveyId}`, {
+            method: "DELETE",
+          });
+
+          showAlert("Pesquisa excluída com sucesso!", "success");
+          loadSurveys();
+          loadDashboard(); // Atualizar stats
+        } catch (error) {
+          showAlert("Erro ao excluir pesquisa");
+        }
+      }
+
+      // ===== FUNÇÕES DE ANALYTICS =====
+      async function loadAnalytics() {
+        try {
+          const data = await apiCall("/analytics/dashboard");
+          const analyticsContent = document.getElementById("analyticsContent");
+
+          analyticsContent.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="stat-icon fas fa-poll"></i>
+                            <div class="stat-number">${data.stats.totalSurveys}</div>
+                            <div class="stat-label">Total de Pesquisas</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="stat-icon fas fa-users"></i>
+                            <div class="stat-number">${data.stats.totalResponses}</div>
+                            <div class="stat-label">Total de Respostas</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="stat-icon fas fa-percentage"></i>
+                            <div class="stat-number">${data.stats.averageResponseRate}%</div>
+                            <div class="stat-label">Taxa Média de Resposta</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="stat-icon fas fa-clock"></i>
+                            <div class="stat-number">2.5min</div>
+                            <div class="stat-label">Tempo Médio de Resposta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-grid">
+                        <div class="chart-container">
+                            <h3 class="chart-title">📊 Distribuição por Status</h3>
+                            <canvas id="statusDistributionChart" class="chart-canvas"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h3 class="chart-title">📅 Respostas por Mês</h3>
+                            <canvas id="monthlyResponsesChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                `;
+
+          // Renderizar gráficos específicos do analytics
+          renderStatusDistributionChart(data.stats);
+          renderMonthlyResponsesChart();
+        } catch (error) {
+          console.error("Erro ao carregar analytics:", error);
+          showAlert("Erro ao carregar analytics");
+        }
+      }
+
+      function renderStatusDistributionChart(stats) {
+        const ctx = document
+          .getElementById("statusDistributionChart")
+          .getContext("2d");
+
+        new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            labels: ["Ativas", "Rascunhos", "Pausadas", "Finalizadas"],
+            datasets: [
+              {
+                data: [
+                  stats.activeSurveys,
+                  stats.totalSurveys - stats.activeSurveys,
+                  0,
+                  0,
+                ],
+                backgroundColor: [
+                  "rgba(72, 187, 120, 0.8)",
+                  "rgba(237, 137, 54, 0.8)",
+                  "rgba(66, 153, 225, 0.8)",
+                  "rgba(113, 128, 150, 0.8)",
+                ],
+                borderColor: [
+                  "rgb(72, 187, 120)",
+                  "rgb(237, 137, 54)",
+                  "rgb(66, 153, 225)",
+                  "rgb(113, 128, 150)",
+                ],
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+              },
+            },
+          },
+        });
+      }
+
+      function renderMonthlyResponsesChart() {
+        const ctx = document
+          .getElementById("monthlyResponsesChart")
+          .getContext("2d");
+
+        // Dados simulados para demonstração
+        const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"];
+        const responses = [45, 78, 92, 67, 134, 89];
+
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: months,
+            datasets: [
+              {
+                label: "Respostas",
+                data: responses,
+                backgroundColor: "rgba(102, 126, 234, 0.8)",
+                borderColor: "rgb(102, 126, 234)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      }
+
+      async function viewSurveyAnalytics(surveyId) {
+        try {
+          currentAnalyticsSurveyId = surveyId;
+          const data = await apiCall(`/analytics/survey/${surveyId}`);
+
+          const content = document.getElementById("surveyAnalyticsContent");
+          content.innerHTML = `
+                    <div style="margin-bottom: 30px;">
+                        <h2 style="color: var(--dark-gray); margin-bottom: 10px;">${
+                          data.survey.title
+                        }</h2>
+                        <p style="color: var(--medium-gray);">Total de respostas: <strong>${
+                          data.totalResponses
+                        }</strong></p>
+                    </div>
+                    
+                    <div id="analyticsCharts">
+                        ${Object.entries(data.analytics)
+                          .map(
+                            ([questionName, questionData]) => `
+                            <div class="chart-container">
+                                <h3 class="chart-title">${
+                                  questionData.title
+                                }</h3>
+                                <div style="margin-bottom: 15px;">
+                                    <span style="background: var(--light-gray); padding: 5px 10px; border-radius: 5px; font-size: 0.9rem;">
+                                        ${questionData.type} • ${
+                              questionData.stats.total
+                            } respostas
+                                    </span>
+                                </div>
+                                <canvas id="chart_${questionName}" class="chart-canvas"></canvas>
+                                ${
+                                  questionData.stats.average
+                                    ? `<p style="margin-top: 10px;"><strong>Média:</strong> ${questionData.stats.average}</p>`
+                                    : ""
+                                }
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                `;
+
+          // Renderizar gráficos para cada pergunta
+          Object.entries(data.analytics).forEach(
+            ([questionName, questionData]) => {
+              renderQuestionChart(questionName, questionData);
+            }
+          );
+
+          document
+            .getElementById("surveyAnalyticsModal")
+            .classList.add("active");
+        } catch (error) {
+          console.error("Erro ao carregar analytics da pesquisa:", error);
+          showAlert("Erro ao carregar analytics da pesquisa");
+        }
+      }
+
+      function renderQuestionChart(questionName, questionData) {
+        const ctx = document
+          .getElementById(`chart_${questionName}`)
+          .getContext("2d");
+
+        if (!questionData.stats.distribution) {
+          // Para perguntas abertas, mostrar estatísticas básicas
+          ctx.canvas.parentElement.innerHTML += `
+                    <div style="padding: 20px; background: var(--light-gray); border-radius: 10px; margin-top: 10px;">
+                        <p><strong>Total de respostas:</strong> ${
+                          questionData.stats.total
+                        }</p>
+                        ${
+                          questionData.stats.averageLength
+                            ? `<p><strong>Comprimento médio:</strong> ${questionData.stats.averageLength} caracteres</p>`
+                            : ""
+                        }
+                        ${
+                          questionData.stats.wordCount
+                            ? `<p><strong>Total de palavras:</strong> ${questionData.stats.wordCount}</p>`
+                            : ""
+                        }
+                    </div>
+                `;
+          return;
+        }
+
+        const labels = Object.keys(questionData.stats.distribution);
+        const values = Object.values(questionData.stats.distribution);
+
+        const chartType = questionData.type === "rating" ? "bar" : "doughnut";
+
+        new Chart(ctx, {
+          type: chartType,
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Respostas",
+                data: values,
+                backgroundColor:
+                  chartType === "doughnut"
+                    ? [
+                        "rgba(102, 126, 234, 0.8)",
+                        "rgba(118, 75, 162, 0.8)",
+                        "rgba(240, 147, 251, 0.8)",
+                        "rgba(72, 187, 120, 0.8)",
+                        "rgba(237, 137, 54, 0.8)",
+                      ]
+                    : "rgba(102, 126, 234, 0.8)",
+                borderColor:
+                  chartType === "doughnut"
+                    ? [
+                        "rgb(102, 126, 234)",
+                        "rgb(118, 75, 162)",
+                        "rgb(240, 147, 251)",
+                        "rgb(72, 187, 120)",
+                        "rgb(237, 137, 54)",
+                      ]
+                    : "rgb(102, 126, 234)",
+                borderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales:
+              chartType === "bar"
+                ? {
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        stepSize: 1,
+                      },
+                    },
+                  }
+                : {},
+            plugins: {
+              legend: {
+                display: chartType === "doughnut",
+                position: "bottom",
+              },
+            },
+          },
+        });
+      }
+
+      async function exportToPDF(surveyId) {
+        try {
+          showAlert("Gerando relatório PDF...", "warning");
+
+          const response = await fetch(
+            `${API_BASE}/analytics/survey/${surveyId}/export-pdf`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Erro ao gerar PDF");
+          }
+
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.style.display = "none";
+          a.href = url;
+          a.download = `relatorio-pesquisa-${surveyId}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          showAlert("Relatório PDF baixado com sucesso!", "success");
+        } catch (error) {
+          console.error("Erro ao exportar PDF:", error);
+          showAlert("Erro ao exportar relatório PDF");
+        }
+      }
+
+      // ===== FUNÇÕES DE RESPOSTAS =====
+      async function loadResponsesPage() {
+        try {
+          // Carregar lista de pesquisas para o filtro
+          const surveysData = await apiCall("/surveys?limit=100");
+          const surveyFilter = document.getElementById("responseSurveyFilter");
+
+          surveyFilter.innerHTML =
+            '<option value="">Selecione uma pesquisa</option>' +
+            surveysData.surveys
+              .map(
+                (survey) =>
+                  `<option value="${survey.id}">${survey.title}</option>`
+              )
+              .join("");
+        } catch (error) {
+          console.error("Erro ao carregar página de respostas:", error);
+        }
+      }
+
+      async function loadSurveyResponses(surveyId) {
+        try {
+          const data = await apiCall(`/surveys/${surveyId}/responses`);
+          const content = document.getElementById("responsesContent");
+
+          if (data.responses && data.responses.length > 0) {
+            content.innerHTML = `
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📝 Respostas da Pesquisa</h3>
+                                <span style="color: var(--medium-gray);">Total: ${
+                                  data.responses.length
+                                } respostas</span>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background: var(--light-gray);">
+                                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color);">Data</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color);">Respostas</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color);">IP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.responses
+                                          .map(
+                                            (response) => `
+                                            <tr>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">
+                                                    ${formatDate(
+                                                      response.submitted_at
+                                                    )}
+                                                </td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">
+                                                    <pre style="background: var(--light-gray); padding: 10px; border-radius: 5px; font-size: 0.9rem; max-width: 400px; overflow-x: auto;">${JSON.stringify(
+                                                      response.response_data,
+                                                      null,
+                                                      2
+                                                    )}</pre>
+                                                </td>
+                                                <td style="padding: 12px; border-bottom: 1px solid var(--border-color);">
+                                                    ${
+                                                      response.ip_address ||
+                                                      "N/A"
+                                                    }
+                                                </td>
+                                            </tr>
+                                        `
+                                          )
+                                          .join("")}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+          } else {
+            content.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: var(--medium-gray);">
+                            <i class="fas fa-inbox" style="font-size: 4rem; margin-bottom: 20px; color: var(--border-color);"></i>
+                            <h3>Nenhuma resposta encontrada</h3>
+                            <p>Esta pesquisa ainda não recebeu respostas.</p>
+                        </div>
+                    `;
+          }
+        } catch (error) {
+          console.error("Erro ao carregar respostas:", error);
+          showAlert("Erro ao carregar respostas da pesquisa");
+        }
+      }
+
+      // ===== FUNÇÕES AUXILIARES =====
+      function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      function closeSurveyBuilder() {
+        document
+          .getElementById("surveyBuilderModal")
+          .classList.remove("active");
+        currentSurvey = null;
+        surveyCreator = null;
+      }
+
+      function closeSurveyPreview() {
+        document
+          .getElementById("surveyPreviewModal")
+          .classList.remove("active");
+      }
+
+      function closeSurveyAnalytics() {
+        document
+          .getElementById("surveyAnalyticsModal")
+          .classList.remove("active");
+        currentAnalyticsSurveyId = null;
+      }
+
+      // ===== EVENT LISTENERS =====
+      document.addEventListener("DOMContentLoaded", function () {
+        // Auth form handlers
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            setLoading("loginForm", true);
+
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+
+            await login(email, password);
+            setLoading("loginForm", false);
+          });
+
+        document
+          .getElementById("registerForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
+            setLoading("registerForm", true);
+
+            const name = document.getElementById("registerName").value;
+            const email = document.getElementById("registerEmail").value;
+            const password = document.getElementById("registerPassword").value;
+
+            await register(name, email, password);
+            setLoading("registerForm", false);
+          });
+
+        document
+          .getElementById("authSwitchLink")
+          .addEventListener("click", function (e) {
+            e.preventDefault();
+            switchAuthMode();
+          });
+
+        // Survey creation form
+        document
+          .getElementById("createSurveyForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+            createSurvey();
+          });
+
+        // Menu navigation
+        document.querySelectorAll(".menu-link[data-page]").forEach((link) => {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const page = this.getAttribute("data-page");
+            showPage(page);
+          });
+        });
+
+        // Search and filter handlers
+        document
+          .getElementById("searchSurveys")
+          ?.addEventListener("input", function () {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(() => {
+              loadSurveys();
+            }, 500);
+          });
+
+        document
+          .getElementById("statusFilter")
+          ?.addEventListener("change", function () {
+            loadSurveys();
+          });
+
+        document
+          .getElementById("responseSurveyFilter")
+          ?.addEventListener("change", function () {
+            const surveyId = this.value;
+            if (surveyId) {
+              loadSurveyResponses(surveyId);
+            } else {
+              document.getElementById("responsesContent").innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: var(--medium-gray);">
+                            <i class="fas fa-comments" style="font-size: 4rem; margin-bottom: 20px; color: var(--border-color);"></i>
+                            <h3>Selecione uma pesquisa para ver as respostas</h3>
+                            <p>Escolha uma pesquisa no filtro acima para visualizar e analisar as respostas.</p>
+                        </div>
+                    `;
+            }
+          });
+
+        // Modal close handlers
+        window.addEventListener("click", function (e) {
+          const modals = document.querySelectorAll(".modal");
+          modals.forEach((modal) => {
+            if (e.target === modal) {
+              modal.classList.remove("active");
+            }
+          });
+        });
+
+        // Responsive sidebar
+        function updateResponsive() {
+          const isMobile = window.innerWidth <= 768;
+          const sidebarToggle = document.querySelector(".mobile-menu-toggle");
+
+          if (isMobile) {
+            sidebarToggle.style.display = "block";
+            document.getElementById("sidebar").classList.add("hidden");
+          } else {
+            sidebarToggle.style.display = "none";
+            document
+              .getElementById("sidebar")
+              .classList.remove("hidden", "mobile-open");
+          }
+        }
+
+        window.addEventListener("resize", updateResponsive);
+        updateResponsive();
+
+        // Check authentication status
+        checkAuth();
+      });
+    </script>
+  </body>
+</html>
